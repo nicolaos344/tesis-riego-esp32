@@ -1,0 +1,13 @@
+# Arduino / IDE
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# VSCode (si lo usás)
+.vscode/
+
+# Build / cache (si aparecen)
+build/
+out/
