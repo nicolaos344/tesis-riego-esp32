@@ -1,7 +1,15 @@
 #include <DHT.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 #define DHTPIN 19
 #define DHTTYPE DHT11
+
+#define LCD_ADDR 0x27
+#define LCD_COLS 16
+#define LCD_ROWS 2
+
+LiquidCrystal_I2C lcd(LCD_ADDR, LCD_COLS, LCD_ROWS);
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -35,6 +43,16 @@ void setup() {
   digitalWrite(pinReleExtractor, HIGH);
 
   dht.begin();
+
+  Wire.begin();
+  lcd.init();
+  lcd.backlight();
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Sistema OK");
+  delay(800);
+  lcd.clear();
 
 }
 
@@ -105,4 +123,25 @@ void controlarBomba() {
     Serial.print("C | H: ");
     Serial.print(humAmb);
     Serial.println("%");
+
+    // ----- LCD 16x2 ----
+    lcd.setCursor(0, 0);
+    lcd.print("S:");
+    lcd.print(humedadSueloPct);
+    lcd.print("% T:");
+    lcd.print(tempAmb, 1); // 1 decimal
+
+    lcd.setCursor(0, 1);
+    lcd.print("H:");
+    lcd.print(humAmb, 0); // sin decimales
+    lcd.print("% ");
+
+    // Estados (rele ACTIVE-LOW)
+    bool bombaON = (digitalRead(pinReleBomba) == LOW);
+    bool extON = (digitalRead(pinReleExtractor) == LOW);
+
+    lcd.print("B:");
+    lcd.print(bombaON ? "ON " : "OFF");
+    lcd.print("E:");
+    lcd.print(extON ? "ON " : "OFF");
   }
