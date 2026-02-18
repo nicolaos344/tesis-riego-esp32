@@ -30,8 +30,8 @@ const int umbralSuelo = 50;
 const float umbralTemp = 25.0;
 
 // Calibracion ADC
-const int sueloSeco = 4095;
-const int sueloHumedo = 1900;
+const int sueloSeco = 2450;
+const int sueloHumedo = 1250;
 
 void setup() {
   Serial.begin(115200);
@@ -42,6 +42,9 @@ void setup() {
   digitalWrite(pinReleBomba, HIGH);
   digitalWrite(pinReleExtractor, HIGH);
 
+  analogReadResolution(12);
+  analogSetPinAttenuation(pinSuelo, ADC_11db);
+  
   dht.begin();
 
   Wire.begin();
@@ -67,7 +70,7 @@ void loop() {
 }
 
 void controlarBomba() {
-    if (!bombaActiva && humedadSueloPct < 50) {
+    if (!bombaActiva && humedadSueloPct < umbralSuelo) {
       digitalWrite(pinReleBomba, LOW);
       bombaActiva = true;
       tInicioBomba = millis();
@@ -106,7 +109,7 @@ void controlarBomba() {
     humedadSueloPct = map(lecturaSuelo, sueloSeco, sueloHumedo, 0, 100);
     humedadSueloPct = constrain(humedadSueloPct, 0, 100);
 
-    // --- DHT22 ---
+    // --- DHT11 ---
     float t = dht.readTemperature();
     float h = dht.readHumidity();
 
