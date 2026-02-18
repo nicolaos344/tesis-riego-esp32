@@ -26,8 +26,12 @@ bool bombaActiva = false;
 unsigned long tInicioBomba = 0;
 
 //Umbrales
-const int umbralSuelo = 50;
+const int umbralSueloON = 50;    // Encendido (suelo seco)
+const int umbralSueloOFF = 80;   // Apagado (suelo suficientemente húmedo)
 const float umbralTemp = 25.0;
+
+// Seguridad de riego
+const unsigned long tiempoMaxRiegoMs = 10000; // 10 segundos máximo
 
 // Calibracion ADC
 const int sueloSeco = 2450;
@@ -70,14 +74,14 @@ void loop() {
 }
 
 void controlarBomba() {
-    if (!bombaActiva && humedadSueloPct < umbralSuelo) {
+    if (!bombaActiva && humedadSueloPct < umbralSueloON) {
       digitalWrite(pinReleBomba, LOW);
       bombaActiva = true;
       tInicioBomba = millis();
       Serial.println("Bomba ACTIVADA");
     }
     
-    if (bombaActiva && millis() - tInicioBomba >= 5000) {
+    if (bombaActiva && (humedadSueloPct >= umbralSueloOFF || millis() - tInicioBomba >= tiempoMaxRiegoMs)) {
       digitalWrite(pinReleBomba, HIGH);
       bombaActiva = false;
       Serial.println("Bomba DESACTIVADA");
