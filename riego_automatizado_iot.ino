@@ -28,10 +28,20 @@ unsigned long tInicioBomba = 0;
 //Umbrales
 const int umbralSueloON = 50;    // Encendido (suelo seco)
 const int umbralSueloOFF = 80;   // Apagado (suelo suficientemente húmedo)
-const float umbralTemp = 25.0;
 
 // Seguridad de riego
-const unsigned long tiempoMaxRiegoMs = 10000; // 10 segundos máximo
+const unsigned long tiempoMaxRiegoMs = 5000; // 5 segundos máximo
+
+// Umbrales extractor - Humedad
+const float humON = 65.0;    // Encendido por humedad
+const float humOFF = 55.0;   // Apagado por humedad (histeresis)
+
+// Umbrales extractor - Temperatura
+const float tempON = 28.0;   // Encendido por temperatura
+const float tempOFF = 25.0;  // Apagado por temperatura (histeresis)
+
+// Estado extractor
+bool extractorActivo = false;
 
 // Calibracion ADC
 const int sueloSeco = 2450;
@@ -89,10 +99,20 @@ void controlarBomba() {
   }
 
   void controlarExtractor() {
-    if (humAmb > 60.0) {
+     // --- ENCENDIDO (si alguna variable supera su umbral ON) ---
+    if (!extractorActivo && 
+        (humAmb >= humON || tempAmb >= tempON)) {
+
       digitalWrite(pinReleExtractor, LOW);
-    } else {
+      extractorActivo = true;
+    }
+
+    // --- APAGADO (solo cuando ambas variables bajan de su OFF) ---
+    if (extractorActivo && 
+        (humAmb <= humOFF && tempAmb <= tempOFF)) {
+
       digitalWrite(pinReleExtractor, HIGH);
+      extractorActivo = false;
     }
   }
 
